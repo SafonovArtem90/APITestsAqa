@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Консольный аппендер (вывод в консоль) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Настройка уровней логирования -->
+
+    <!-- Выводим наши логи (INFO и выше) -->
+    <logger name="com.project" level="DEBUG"/>
+
+    <!-- Скрываем лишние логи Apache HttpClient (они очень шумные) -->
+    <logger name="org.apache.http" level="WARN"/>
+
+    <!--
+       Логи WireMock.
+       INFO обычно достаточно, но если нужно видеть детали мэтчинга запросов,
+       поставьте DEBUG.
+    -->
+    <logger name="com.github.tomakehurst.wiremock" level="DEBUG"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>
