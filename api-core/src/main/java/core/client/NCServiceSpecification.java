@@ -11,7 +11,7 @@ import io.restassured.specification.ResponseSpecification;
 
 import java.util.Map;
 
-import static core.constants.TestConstants.X_API_KEY;
+import static core.constants.CoreConstants.X_API_KEY;
 
 public class NCServiceSpecification {
 

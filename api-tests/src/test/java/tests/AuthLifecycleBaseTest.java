@@ -1,6 +1,8 @@
 package tests;
 
+import annotation.WithMock;
 import base.BaseTest;
+import config.MockType;
 import core.dto.FailRs;
 import core.dto.Token;
 import core.enums.ActionsEnum;
@@ -12,12 +14,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Map;
 
-import static core.constants.TestConstants.ERROR_MESSAGE;
-import static core.constants.TestConstants.INTERNAL_SERVER_ERROR;
-import static core.constants.TestConstants.MISSING_KEY_ERROR;
-import static core.constants.TestConstants.OK_MESSAGE;
-import static core.constants.TestConstants.TOKEN_MUST_MATCHES_REGEX;
-import static core.constants.TestConstants.errorMessageTokenNotFound;
+import static constants.TestConstants.ERROR_MESSAGE;
+import static constants.TestConstants.INTERNAL_SERVER_ERROR;
+import static constants.TestConstants.MISSING_KEY_ERROR;
+import static constants.TestConstants.OK_MESSAGE;
+import static constants.TestConstants.TOKEN_MUST_MATCHES_REGEX;
+import static constants.TestConstants.errorMessageTokenNotFound;
 import static core.utils.Assertions.assertFieldEquals;
 import static core.utils.Assertions.assertStatusCode;
 import static core.utils.ParamsRequiredGenerator.generateParamsWithAction;
@@ -38,10 +40,8 @@ class AuthLifecycleBaseTest extends BaseTest {
     @DisplayName("Сценарий: Полный жизненный цикл действий (LOGIN -> ACTION -> LOGOUT).")
     @Severity(SeverityLevel.BLOCKER)
     @Description("Проверяем, что пользователь может успешно пройти все этапы действий с системой.")
+    @WithMock(auth = MockType.SUCCESS, action = MockType.SUCCESS)
     void testFullUserLifecycle(@TokenExtensions Token token) {
-        mockService.stubAuthSuccess();
-        mockService.stubDoActionSuccess();
-
         step("Пользователь выполняет LOGIN", () -> {
             var response = serviceSteps.receivedSuccessRs(generateParamsWithLogin(token));
             assertFieldEquals(response.result(), OK_MESSAGE);
@@ -70,9 +70,8 @@ class AuthLifecycleBaseTest extends BaseTest {
     @DisplayName("Сценарий: Выполняются действия LOGIN для успешного вызова внешнего сервиса.")
     @Description("Проверяем, что сервис на действие LOGIN тригерит вызов /auth.")
     @Severity(SeverityLevel.NORMAL)
+    @WithMock(auth = MockType.SUCCESS)
     void testSuccessfulLogin(@TokenExtensions Token token) {
-        mockService.stubAuthSuccess();
-
         step("Пользователь выполняет LOGIN", () -> {
             var response = serviceSteps.receivedSuccessRs(generateParamsWithLogin(token));
             assertFieldEquals(response.result(), OK_MESSAGE);
@@ -85,10 +84,8 @@ class AuthLifecycleBaseTest extends BaseTest {
     @DisplayName("Сценарий: Выполняются действия LOGIN и ACTION для успешных вызовов внешнего сервиса.")
     @Description("Проверяем, что сервис на действие ACTION тригерит вызов /doAction.")
     @Severity(SeverityLevel.NORMAL)
+    @WithMock(auth = MockType.SUCCESS, action = MockType.SUCCESS)
     void testActionAfterLogin(@TokenExtensions Token token) {
-        mockService.stubAuthSuccess();
-        mockService.stubDoActionSuccess();
-
         step("Пользователь выполняет LOGIN и ACTION", () -> {
             serviceSteps.receivedSuccessRs(generateParamsWithLogin(token));
             var response = serviceSteps.receivedSuccessRs(generateParamsWithAction(token));
@@ -103,9 +100,8 @@ class AuthLifecycleBaseTest extends BaseTest {
     @DisplayName("Сценарий: Ошибка внешнего сервиса.")
     @Description("Проверяем, что сервис не делает вызов /auth, при выполнении LOGIN, если внешний сервис не доступен.")
     @Severity(SeverityLevel.NORMAL)
+    @WithMock(auth = MockType.ERROR)
     void testLoginFailsWhenExternalServiceIsDown(@TokenExtensions Token token) {
-        mockService.stubExternalServiceErrorAuthWith500();
-
         step("Попытка входа при недоступности внешнего сервиса.", () -> {
             var response = serviceSteps.receivedFailRs(generateParamsWithLogin(token), 500);
             assertAll(
@@ -121,11 +117,10 @@ class AuthLifecycleBaseTest extends BaseTest {
     @DisplayName("Сценарий: Отправка LOGIN с не валидным token (31 символ).")
     @Description("Проверяем, что сервис вернет ошибку с невалидными данными запроса и не будет вызова внешнего сервиса.")
     @Severity(SeverityLevel.NORMAL)
+    @WithMock(auth = MockType.SUCCESS)
     void testLoginInvalidTokenLength() {
         step("Попытка входа при недоступности внешнего сервиса.", () -> {
-            mockService.stubAuthSuccess();
-
-            var response = serviceSteps.receivedFailResponse(generateParamsWithTokenAndAction(generateInValidToken(), ActionsEnum.LOGIN));
+            var response = serviceSteps.receivedResponse(generateParamsWithTokenAndAction(generateInValidToken(), ActionsEnum.LOGIN));
             assertAll(
                     () -> assertStatusCode(response.getStatusCode(), 400),
                     () -> assertFieldEquals(response.as(FailRs.class).result(), ERROR_MESSAGE),
@@ -141,10 +136,8 @@ class AuthLifecycleBaseTest extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     @Description("Проверяем, что система должна блокировать попытки выполнения действий без начального действия LOGIN." +
             " Вызов /doAction не происходит.")
+    @WithMock(auth = MockType.SUCCESS, action = MockType.SUCCESS)
     void testActionWithoutLoginShouldFail(@TokenExtensions Token token) {
-        mockService.stubAuthSuccess();
-        mockService.stubDoActionSuccess();
-
         step("Пользователь выполняет ACTION без LOGIN", () -> {
             var response = serviceSteps.receivedFailRs(generateParamsWithAction(token), 403);
             assertAll(
@@ -161,12 +154,11 @@ class AuthLifecycleBaseTest extends BaseTest {
     @DisplayName("Сценарий: Попытка LOGIN с неверным X-Api-Key ключом.")
     @Severity(SeverityLevel.CRITICAL)
     @Description("Проверяем, что система должна блокировать попытки выполнения действий с неверным ключом.")
+    @WithMock(auth = MockType.SUCCESS, action = MockType.SUCCESS)
     void testInvalidApiKeyCheck(@TokenExtensions Token token) {
-        mockService.stubAuthSuccess();
         Map<String, String> badHeaders = Map.of("X-Api-Key", "INVALID_KEY_123");
-
         step("Отправка запроса с поддельным ключом X-Api-Key", () -> {
-            var response = serviceSteps.receivedFailRsWithCustomHeader(generateParamsWithLogin(token), badHeaders);
+            var response = serviceSteps.receivedFailResponseWithCustomHeader(generateParamsWithLogin(token), badHeaders);
 
             assertAll(
                     () -> assertStatusCode(response.getStatusCode(), 401),
@@ -176,5 +168,6 @@ class AuthLifecycleBaseTest extends BaseTest {
         });
 
         mockService.verifyAuthNotCalled();
+        mockService.verifyDoActionNotCalled();
     }
 }

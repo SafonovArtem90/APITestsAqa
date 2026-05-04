@@ -12,6 +12,7 @@
     <modules>
         <module>api-core</module>
         <module>api-tests</module>
+        <module>api-mock</module>
     </modules>
 
     <properties>
@@ -29,7 +30,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Зависимости и их версии -->
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
@@ -80,11 +80,6 @@
                 <version>${wiremock.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wiremock</groupId>
-                <artifactId>wiremock-junit5</artifactId>
-                <version>${wiremock.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
@@ -129,7 +124,6 @@
                     </dependencies>
                     <configuration>
                         <configLocation>config/checkstyle/checkstyle.xml</configLocation>
-                        <encoding>UTF-8</encoding>
                         <consoleOutput>true</consoleOutput>
                         <failsOnError>true</failsOnError>
                         <linkXRef>false</linkXRef>

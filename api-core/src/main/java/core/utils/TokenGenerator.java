@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static core.constants.TestConstants.LENGTH;
-import static core.constants.TestConstants.REGEX;
+import static core.constants.CoreConstants.LENGTH;
+import static core.constants.CoreConstants.REGEX;
 
 @Slf4j
 public class TokenGenerator {

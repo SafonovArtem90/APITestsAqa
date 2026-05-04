@@ -16,12 +16,12 @@ public class NCServiceSteps {
     }
 
     @Step("Отправка не успешного запроса /endpoint с параметрами:{paramsReq} и c заголовками:{customHeaders}")
-    public Response receivedFailRsWithCustomHeader(ParamsReq paramsReq, Map<String, String> customHeaders) {
-        return NCServiceManager.receivedFailRsWithCustomHeaderFromEndpoint(paramsReq, customHeaders);
+    public Response receivedFailResponseWithCustomHeader(ParamsReq paramsReq, Map<String, String> customHeaders) {
+        return NCServiceManager.receivedFailResponseWithCustomHeaderFromEndpoint(paramsReq, customHeaders);
     }
 
-    @Step("Отправка не успешного запроса /endpoint с параметрами:{paramsReq}")
-    public Response receivedFailResponse(ParamsReq paramsReq) {
+    @Step("Отправка запроса /endpoint с параметрами:{paramsReq}")
+    public Response receivedResponse(ParamsReq paramsReq) {
         return NCServiceManager.receivedResponseFromEndpoint(paramsReq);
     }
 
@@ -31,7 +31,7 @@ public class NCServiceSteps {
     }
 
     @Step("Отправка запроса /endpoint с параметрами:{paramsReq} и c заголовками:{customHeaders} и статус-кодом:{statusCode}")
-    public Response receivedResponse(Map<String, String> paramsReq, Map<String, String> customHeaders, int statusCode) {
+    public Response receivedResponseWithCustomData(Map<String, String> paramsReq, Map<String, String> customHeaders, int statusCode) {
         return NCServiceManager.receivedResponseFromEndpointWithAllParams(paramsReq, customHeaders, statusCode);
     }
 }

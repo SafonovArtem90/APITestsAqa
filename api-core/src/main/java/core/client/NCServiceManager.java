@@ -28,7 +28,7 @@ public class NCServiceManager extends NCService {
         return performPostMethod(URL_ENDPOINT, baseSpecReq(), baseSpecResWithStatusCode(statusCode), formParams).as(FailRs.class);
     }
 
-    public static Response receivedFailRsWithCustomHeaderFromEndpoint(ParamsReq paramsReq, Map<String, String> customHeaders) {
+    public static Response receivedFailResponseWithCustomHeaderFromEndpoint(ParamsReq paramsReq, Map<String, String> customHeaders) {
         Map<String, String> formParams = Map.of(TOKEN_NAME, paramsReq.getToken(), ACTION_NAME, paramsReq.getActionsEnum().getAction());
         return performPostMethod(URL_ENDPOINT, baseSpecReqWithHeader(customHeaders), baseSpecRes(), formParams);
     }
