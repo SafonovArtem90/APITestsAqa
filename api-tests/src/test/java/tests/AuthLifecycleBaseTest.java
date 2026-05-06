@@ -7,10 +7,8 @@ import core.dto.FailRs;
 import core.dto.Token;
 import core.enums.ActionsEnum;
 import extensions.TokenExtensions;
-import extensions.TokenResolver;
 import io.qameta.allure.*;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Map;
 
@@ -33,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Epic("Сервис выполнения действий")
 @Feature("Управление действиями")
 @Owner("AQA")
-@ExtendWith(TokenResolver.class)
 class AuthLifecycleBaseTest extends BaseTest {
 
     @Test
