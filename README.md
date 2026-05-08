@@ -31,4 +31,8 @@ Java 17, Maven, JUnit 5, RestAssured, WireMock, Allure, Lombok
 
 #### Команды запуска
 * Сборка проекта и запуск тестов: mvn clean test
+* Можно указать свойство -Dparallel=true/false. Если его не будет, 
+то берется значение из pom.xml -> properties.parallel(true)
+* Если запускается из IDEA, то для параллельного запуска тесты
+смотрят на значение из junit-platform.properties
 * Генерация и открытие Allure отчета: allure serve api-tests/target/allure-results

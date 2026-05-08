@@ -3,23 +3,29 @@ package base;
 import annotation.WithMock;
 import config.MockType;
 import io.qameta.allure.Allure;
-import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.MockService;
 
 public class MockRegister {
+    private static final Logger log = LoggerFactory.getLogger(MockRegister.class);
 
-    public static void mockRegisterStub(TestInfo testInfo, MockService mockService){
+    public static void mockRegisterStub(ExtensionContext context, MockService mockService, String token){
 
-        testInfo.getTestMethod().ifPresent(method -> {
+        context.getTestMethod().ifPresent(method -> {
             WithMock annotation = method.getAnnotation(WithMock.class);
-            if (annotation != null) {
-                Allure.parameter("Mock Auth ->", annotation.auth().name());
-                Allure.parameter("Mock doAction ->", annotation.action().name());
+            if (annotation != null & token != null) {
+                log.info("Configuring Stubs for Token [{}]: Auth={}, Action={}",
+                         token, annotation.auth(), annotation.action());
+                Allure.parameter("Configuring Stubs for Token ->", token);
+                Allure.parameter("Stub Auth ->", annotation.auth());
+                Allure.parameter("Stub doAction ->", annotation.action());
 
-                if (annotation.auth() == MockType.SUCCESS) mockService.stubAuthSuccess();
-                if (annotation.auth() == MockType.ERROR) mockService.stubExternalServiceErrorAuthWith500();
+                if (annotation.auth() == MockType.SUCCESS) mockService.stubAuthSuccess(token);
+                if (annotation.auth() == MockType.ERROR) mockService.stubExternalServiceErrorAuthWith500(token);
 
-                if (annotation.action() == MockType.SUCCESS) mockService.stubDoActionSuccess();
+                if (annotation.action() == MockType.SUCCESS) mockService.stubDoActionSuccess(token);
             }
         });
     }

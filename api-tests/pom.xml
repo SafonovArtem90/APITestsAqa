@@ -11,6 +11,10 @@
 
     <artifactId>api-tests</artifactId>
 
+    <properties>
+        <parallel>true</parallel>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.nordCodes</groupId>
@@ -62,14 +66,12 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <parallel>methods</parallel>
-                    <threadCount>2</threadCount>
                     <argLine>
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.9.22/aspectjweaver-1.9.22.jar"
                     </argLine>
                     <systemPropertyVariables>
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
-                        <junit.jupiter.execution.parallel.enabled>false</junit.jupiter.execution.parallel.enabled>
+                        <junit.jupiter.execution.parallel.enabled>${parallel}</junit.jupiter.execution.parallel.enabled>
                     </systemPropertyVariables>
                 </configuration>
                 <dependencies>

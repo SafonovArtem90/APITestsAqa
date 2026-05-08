@@ -114,10 +114,10 @@ class AuthLifecycleBaseTest extends BaseTest {
     @DisplayName("Сценарий: Отправка LOGIN с не валидным token (31 символ).")
     @Description("Проверяем, что сервис вернет ошибку с невалидными данными запроса и не будет вызова внешнего сервиса.")
     @Severity(SeverityLevel.NORMAL)
-    @WithMock(auth = MockType.SUCCESS)
     void testLoginInvalidTokenLength() {
+        String token = generateInValidToken();
         step("Попытка входа при недоступности внешнего сервиса.", () -> {
-            var response = serviceSteps.receivedResponse(generateParamsWithTokenAndAction(generateInValidToken(), ActionsEnum.LOGIN));
+            var response = serviceSteps.receivedResponse(generateParamsWithTokenAndAction(token, ActionsEnum.LOGIN));
             assertAll(
                     () -> assertStatusCode(response.getStatusCode(), 400),
                     () -> assertFieldEquals(response.as(FailRs.class).result(), ERROR_MESSAGE),
@@ -125,7 +125,7 @@ class AuthLifecycleBaseTest extends BaseTest {
             );
         });
 
-        mockService.verifyAuthNotCalled();
+        mockService.verifyAuthNotCalled(token);
     }
 
     @Test
@@ -143,8 +143,8 @@ class AuthLifecycleBaseTest extends BaseTest {
             );
         });
 
-        mockService.verifyAuthNotCalled();
-        mockService.verifyDoActionNotCalled();
+        mockService.verifyAuthNotCalled(token.getToken());
+        mockService.verifyDoActionNotCalled(token.getToken());
     }
 
     @Test
@@ -164,7 +164,7 @@ class AuthLifecycleBaseTest extends BaseTest {
             );
         });
 
-        mockService.verifyAuthNotCalled();
-        mockService.verifyDoActionNotCalled();
+        mockService.verifyAuthNotCalled(token.getToken());
+        mockService.verifyDoActionNotCalled(token.getToken());
     }
 }
