@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SECRET: qazWSXedc
+      MOCK_URL: http://host.docker.internal:8888/

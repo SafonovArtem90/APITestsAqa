@@ -5,34 +5,38 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import core.config.ConfigReader;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import service.MockService;
 
 public class MockServerExtension implements BeforeAllCallback {
 
     private static final String MOCK_SERVER_KEY = "MOCK_SERVER_GLOBAL";
+    private static volatile WireMockServer sharedServer;
     private static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.GLOBAL;
 
     @Override
     public void beforeAll(ExtensionContext context) {
         ExtensionContext.Store store = context.getStore(NAMESPACE);
-        MockServerHolder holder = store.get(MOCK_SERVER_KEY, MockServerHolder.class);
 
-        if (holder == null) {
+        if (sharedServer == null || !sharedServer.isRunning()) {
             synchronized (MockServerExtension.class) {
-                holder = store.get(MOCK_SERVER_KEY, MockServerHolder.class);
-                if (holder == null) {
+                if (sharedServer == null || !sharedServer.isRunning()) {
                     WireMockServer server = new WireMockServer(
                             WireMockConfiguration.options()
                                                  .port(Integer.parseInt(ConfigReader.getProperty("mock.service.port")))
                     );
-
-                    holder = new MockServerHolder(server);
+                    sharedServer = server;
+                    MockServerHolder holder = new MockServerHolder(server);
                     store.put(MOCK_SERVER_KEY, holder);
+                    MockServiceRegistry.set(new MockService(server));
                 }
             }
         }
+        if (MockServiceRegistry.get() == null && sharedServer != null) {
+            MockServiceRegistry.set(new MockService(sharedServer));
+        }
     }
 
-    static class MockServerHolder implements ExtensionContext.Store.CloseableResource {
+    static class MockServerHolder implements ExtensionContext.Store.CloseableResource, AutoCloseable {
         private final WireMockServer server;
 
         public MockServerHolder(WireMockServer server) {

@@ -1,0 +1,7 @@
+target/
+api-*/target/
+.git/
+.idea/
+api-tests/target/
+allure-results/
+*.iml

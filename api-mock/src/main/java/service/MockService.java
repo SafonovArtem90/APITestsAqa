@@ -26,9 +26,13 @@ public class MockService {
         this.wireMockServer = wireMockServer;
     }
 
+    private static String stubKey(String endpoint, String token) {
+        return endpoint + "|" + token;
+    }
+
     @Step("MOCK для /auth поднят c возвращаемым статус-кодом 200")
     public void stubAuthSuccess(String token) {
-        log.info("Mock Registered for /auth on port 8888");
+        log.info("Mock Registered for /auth on port {}", wireMockServer.port());
         StubMapping stub = wireMockServer.stubFor(WireMock.post(WireMock.urlPathEqualTo(URL_AUTH))
                                   .withHeader("Content-Type", containing(APPLICATION_URL_ENCODED))
                                   .withHeader("Accept", containing(APPLICATION_JSON))
@@ -36,12 +40,12 @@ public class MockService {
                                   .withRequestBody(containing("token=" + token))
                                   .willReturn(WireMock.aResponse()
                                                       .withStatus(200)));
-        createdStubs.put(token, stub);
+        createdStubs.put(stubKey(URL_AUTH, token), stub);
     }
 
     @Step("MOCK для /doAction поднят c возвращаемым статус-кодом 200")
     public void stubDoActionSuccess(String token) {
-        log.info("Mock Registered for /doAction on port 8888");
+        log.info("Mock Registered for /doAction on port {}", wireMockServer.port());
         StubMapping stub = wireMockServer.stubFor(WireMock.post(WireMock.urlPathEqualTo(URL_DO_ACTION))
                                   .withHeader("Content-Type", containing(APPLICATION_URL_ENCODED))
                                   .withHeader("Accept", containing(APPLICATION_JSON))
@@ -49,12 +53,12 @@ public class MockService {
                                   .withRequestBody(containing("token=" + token))
                                   .willReturn(WireMock.aResponse()
                                                       .withStatus(200)));
-        createdStubs.put(token, stub);
+        createdStubs.put(stubKey(URL_DO_ACTION, token), stub);
     }
 
     @Step("MOCK для {endpoint} поднят c возвращаемым статус-кодом {statusCode}")
     public void stubExternalServiceError(String endpoint, int statusCode, String token) {
-        log.info("Mock Registered Error for {} on port 8888 with code {}", endpoint, statusCode);
+        log.info("Mock Registered Error for {} on port {} with code {}", endpoint, wireMockServer.port(), statusCode);
         StubMapping stub = wireMockServer.stubFor(WireMock.post(WireMock.urlPathEqualTo(endpoint))
                                   .withHeader("Content-Type", containing(APPLICATION_URL_ENCODED))
                                   .withHeader("Accept", containing(APPLICATION_JSON))
@@ -62,12 +66,15 @@ public class MockService {
                                   .withRequestBody(containing("token=" + token))
                                   .willReturn(WireMock.aResponse()
                                                       .withStatus(statusCode)));
-        createdStubs.put(token, stub);
+        createdStubs.put(stubKey(endpoint, token), stub);
     }
 
     public void stubExternalServiceErrorAuthWith500(String token) {
-        log.info("Mock Registered Error for {} on port 8888 with code 500", URL_AUTH);
         stubExternalServiceError(URL_AUTH, 500, token);
+    }
+
+    public void stubExternalServiceErrorDoActionWith500(String token) {
+        stubExternalServiceError(URL_DO_ACTION, 500, token);
     }
 
     @Step("Проверка, что вызов /auth произошел 1 раз")
@@ -96,7 +103,13 @@ public class MockService {
 
     @Step("Очищаются Mock для текущего теста")
     public void cleanupStubs(String token) {
-        wireMockServer.removeStub(createdStubs.get(token));
-        createdStubs.remove(token);
+        createdStubs.entrySet().removeIf(entry -> {
+            String key = entry.getKey();
+            boolean match = key.endsWith("|" + token);
+            if (match && entry.getValue() != null) {
+                wireMockServer.removeStub(entry.getValue());
+            }
+            return match;
+        });
     }
 }

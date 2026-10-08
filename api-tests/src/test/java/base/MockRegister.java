@@ -15,7 +15,7 @@ public class MockRegister {
 
         context.getTestMethod().ifPresent(method -> {
             WithMock annotation = method.getAnnotation(WithMock.class);
-            if (annotation != null & token != null) {
+            if (annotation != null && token != null) {
                 log.info("Configuring Stubs for Token [{}]: Auth={}, Action={}",
                          token, annotation.auth(), annotation.action());
                 Allure.parameter("Configuring Stubs for Token ->", token);
@@ -26,6 +26,7 @@ public class MockRegister {
                 if (annotation.auth() == MockType.ERROR) mockService.stubExternalServiceErrorAuthWith500(token);
 
                 if (annotation.action() == MockType.SUCCESS) mockService.stubDoActionSuccess(token);
+                if (annotation.action() == MockType.ERROR) mockService.stubExternalServiceErrorDoActionWith500(token);
             }
         });
     }

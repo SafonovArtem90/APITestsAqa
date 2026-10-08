@@ -5,7 +5,9 @@ import extensions.AllureEnvironmentExtension;
 import extensions.MockServerExtension;
 import extensions.MockSetupExtension;
 import extensions.TokenResolver;
-import groovy.util.logging.Slf4j;
+import extensions.MockServiceRegistry;
+
+import lombok.extern.slf4j.Slf4j;
 import io.qameta.allure.Step;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +31,7 @@ public class BaseTest {
     void setUp(TestInfo testInfo) {
         MDC.put("testMethod", testInfo.getTestMethod().get().getName());
         this.serviceSteps = new NCServiceSteps();
+        this.mockService = MockServiceRegistry.get();
     }
 
     @AfterEach
