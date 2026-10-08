@@ -87,7 +87,12 @@ java -Dsecret=<ВАШ_SECRET> -Dmock=http://localhost:8888/ -jar resources/jars/
 Allure-шаг и прикладывается stack-trace в виде attachment `Retry N failure`.
 
 ### Allure в CI
-В шаге `allure-report` используется `simple-elf/allure-report-action` для
-построения отчёта и сохранения истории, далее `peaceiris/actions-gh-pages`
-публикует его в ветку `gh-pages`, которая автоматически доступна по адресу:
-`https://<owner>.github.io/<repo>/`.
+Шаг `allure-report` в `.github/workflows/api-tests.yml`:
+* история прошлых прогонов восстанавливается из ветки `gh-pages`
+  (git worktree → `allure-results/history`), поэтому тренд учитывает
+  предыдущие запуски;
+* отчёт генерируется локально на раннере через `allure-commandline`
+  (`npm install -g allure-commandline` → `allure generate`);
+* `peaceiris/actions-gh-pages` публикует отчёт в ветку `gh-pages`,
+  доступную по адресу `https://<owner>.github.io/<repo>/`;
+* ссылка на отчёт выводится в summary прогона Actions.
