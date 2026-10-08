@@ -13,6 +13,8 @@
 
     <properties>
         <parallel>true</parallel>
+        <parallel.threads>4</parallel.threads>
+        <retry.count>1</retry.count>
     </properties>
 
     <dependencies>
@@ -77,6 +79,11 @@
                     <systemPropertyVariables>
                         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
                         <junit.jupiter.execution.parallel.enabled>${parallel}</junit.jupiter.execution.parallel.enabled>
+                        <junit.jupiter.execution.parallel.mode.default>concurrent</junit.jupiter.execution.parallel.mode.default>
+                        <junit.jupiter.execution.parallel.mode.classes.default>concurrent</junit.jupiter.execution.parallel.mode.classes.default>
+                        <junit.jupiter.execution.parallel.config.strategy>fixed</junit.jupiter.execution.parallel.config.strategy>
+                        <junit.jupiter.execution.parallel.config.fixed.parallelism>${parallel.threads}</junit.jupiter.execution.parallel.config.fixed.parallelism>
+                        <test.retry.count>${retry.count}</test.retry.count>
                     </systemPropertyVariables>
                 </configuration>
                 <dependencies>

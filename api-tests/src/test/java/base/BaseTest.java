@@ -6,6 +6,7 @@ import extensions.MockServerExtension;
 import extensions.MockSetupExtension;
 import extensions.TokenResolver;
 import extensions.MockServiceRegistry;
+import extensions.RetryingExtension;
 
 import lombok.extern.slf4j.Slf4j;
 import io.qameta.allure.Step;
@@ -20,7 +21,8 @@ import service.MockService;
 @ExtendWith({AllureEnvironmentExtension.class,
         TokenResolver.class,
         MockSetupExtension.class,
-        MockServerExtension.class})
+        MockServerExtension.class,
+        RetryingExtension.class})
 public class BaseTest {
 
     protected NCServiceSteps serviceSteps;

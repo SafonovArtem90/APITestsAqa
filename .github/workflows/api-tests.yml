@@ -7,6 +7,14 @@ on:
     branches: [ master, refactoring ]
   workflow_dispatch:
 
+env:
+  SERVICE_BASE_URL: http://localhost:8080
+  SERVICE_API_KEY: qazWSXedc
+  MOCK_SERVICE_PORT: "8888"
+  TOKEN_LENGTH: "32"
+  TOKEN_REGEX: ^[0-9A-F]{32}$
+  TEST_RETRY_COUNT: "1"
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,7 +29,15 @@ jobs:
       - name: Run API tests in Docker
         run: |
           mkdir -p allure-results
-          docker run --rm -v "${{ github.workspace }}/allure-results:/app/api-tests/target/allure-results" aqa-tests
+          docker run --rm \
+            -e SERVICE_BASE_URL="${SERVICE_BASE_URL}" \
+            -e SERVICE_API_KEY="${SERVICE_API_KEY}" \
+            -e MOCK_SERVICE_PORT="${MOCK_SERVICE_PORT}" \
+            -e TOKEN_LENGTH="${TOKEN_LENGTH}" \
+            -e TOKEN_REGEX="${TOKEN_REGEX}" \
+            -e TEST_RETRY_COUNT="${TEST_RETRY_COUNT}" \
+            -v "${{ github.workspace }}/allure-results:/app/api-tests/target/allure-results" \
+            aqa-tests
 
       - name: Upload Allure results
         if: always()
@@ -29,3 +45,42 @@ jobs:
         with:
           name: allure-results
           path: allure-results
+
+  allure-report:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Allure results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+
+      - name: Generate Allure report (keeps run history)
+        uses: simple-elf/allure-report-action@v1
+        with:
+          allure_results: allure-results
+          allure_report: allure-report
+          allure_history: gh-pages:allure-history
+          keep_reports: 10
+
+      - name: Deploy Allure report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./allure-report
+          publish_branch: gh-pages
+
+      - name: Publish Allure link to summary
+        run: |
+          echo "## :1234: API Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Allure report: [Open](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> $GITHUB_STEP_SUMMARY
+          echo "Run: [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
