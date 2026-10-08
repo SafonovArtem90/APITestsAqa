@@ -22,7 +22,9 @@ public class MockRegister {
             if (annotation != null && token != null) {
                 log.info("Configuring Stubs for Token [{}]: Auth={}, Action={}",
                          token, annotation.auth(), annotation.action());
-                Allure.parameter("Configuring Stubs for Token ->", token);
+                // excluded=true: токен генерируется уникальным для каждого теста,
+                // параметр виден в отчёте, но не ломает parametersHash (ключ истории Allure)
+                Allure.parameter("Configuring Stubs for Token ->", token, true);
                 Allure.parameter("Stub Auth ->", annotation.auth());
                 Allure.parameter("Stub doAction ->", annotation.action());
 

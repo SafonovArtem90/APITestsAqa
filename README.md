@@ -96,3 +96,11 @@ Allure-шаг и прикладывается stack-trace в виде attachment
 * `peaceiris/actions-gh-pages` публикует отчёт в ветку `gh-pages`,
   доступную по адресу `https://<owner>.github.io/<repo>/`;
 * ссылка на отчёт выводится в summary прогона Actions.
+
+**Важно про историю тестов (вкладка History).** Allure 2.46+ группирует
+историю по ключу `testCaseHash.parametersHash`, где `parametersHash` —
+`md5` всех параметров тест-кейса. Динамические параметры
+(`Response Time (ms)`, `Configuring Stubs for Token ->`) помечены
+`excluded=true` (перегрузка `Allure.parameter(name, value, true)`) —
+они видны в отчёте, но не входят в хеш. Без этого каждый прогон
+получал бы новый ключ и история между запусками не сопоставлялась.

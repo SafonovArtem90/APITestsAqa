@@ -41,7 +41,10 @@ public class CustomAllureRestAssured extends AllureRestAssured {
             long startTime = System.currentTimeMillis();
             Response response = super.filter(requestSpec, responseSpec, filterContext);
             long duration = System.currentTimeMillis() - startTime;
-            Allure.parameter("Response Time (ms)", duration);
+            // excluded=true: динамическое время отображается в отчёте,
+            // но не участвует в parametersHash (ключ истории Allure),
+            // иначе история прогона не сопоставляется между запусками
+            Allure.parameter("Response Time (ms)", duration, true);
 
             String finalName = String.format("%s -> %d %s (%d ms)",
                                              stepName,
