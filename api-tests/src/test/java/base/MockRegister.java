@@ -11,11 +11,15 @@ import service.MockService;
 public class MockRegister {
     private static final Logger log = LoggerFactory.getLogger(MockRegister.class);
 
+    /**
+     * Регистрирует WireMock-стабы на основании аннотации @WithMock на тестовом методе.
+     * MockType.SUCCESS → стаб отвечает 200, MockType.ERROR → стаб отвечает 500.
+     */
     public static void mockRegisterStub(ExtensionContext context, MockService mockService, String token){
 
         context.getTestMethod().ifPresent(method -> {
             WithMock annotation = method.getAnnotation(WithMock.class);
-            if (annotation != null & token != null) {
+            if (annotation != null && token != null) {
                 log.info("Configuring Stubs for Token [{}]: Auth={}, Action={}",
                          token, annotation.auth(), annotation.action());
                 Allure.parameter("Configuring Stubs for Token ->", token);
@@ -26,6 +30,7 @@ public class MockRegister {
                 if (annotation.auth() == MockType.ERROR) mockService.stubExternalServiceErrorAuthWith500(token);
 
                 if (annotation.action() == MockType.SUCCESS) mockService.stubDoActionSuccess(token);
+                if (annotation.action() == MockType.ERROR) mockService.stubExternalServiceErrorDoActionWith500(token);
             }
         });
     }

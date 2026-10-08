@@ -1,6 +1,9 @@
 package core.constants;
 
-public class UrlConstants {
+public final class UrlConstants {
+
+    private UrlConstants() {
+    }
 
     public static final String URL_ENDPOINT = "/endpoint";
 }

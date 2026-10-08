@@ -5,52 +5,42 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import core.config.ConfigReader;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import service.MockService;
 
+/**
+ * Поднимает один общий WireMockServer на весь запуск тестов.
+ * Сервер регистрируется в MockServiceRegistry и останавливается через shutdown hook,
+ * чтобы корректно работать при параллельном выполнении классов тестов.
+ */
 public class MockServerExtension implements BeforeAllCallback {
 
-    private static final String MOCK_SERVER_KEY = "MOCK_SERVER_GLOBAL";
-    private static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.GLOBAL;
+    private static volatile WireMockServer sharedServer;
 
     @Override
     public void beforeAll(ExtensionContext context) {
-        ExtensionContext.Store store = context.getStore(NAMESPACE);
-        MockServerHolder holder = store.get(MOCK_SERVER_KEY, MockServerHolder.class);
-
-        if (holder == null) {
+        // Double-checked locking: создаём сервер только если его ещё нет или он остановлен.
+        if (sharedServer == null || !sharedServer.isRunning()) {
             synchronized (MockServerExtension.class) {
-                holder = store.get(MOCK_SERVER_KEY, MockServerHolder.class);
-                if (holder == null) {
+                if (sharedServer == null || !sharedServer.isRunning()) {
                     WireMockServer server = new WireMockServer(
                             WireMockConfiguration.options()
                                                  .port(Integer.parseInt(ConfigReader.getProperty("mock.service.port")))
                     );
+                    server.start();
+                    sharedServer = server;
+                    MockServiceRegistry.set(new MockService(server));
 
-                    holder = new MockServerHolder(server);
-                    store.put(MOCK_SERVER_KEY, holder);
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        if (sharedServer != null && sharedServer.isRunning()) {
+                            sharedServer.stop();
+                            System.out.println("WireMock Server stopped.");
+                        }
+                    }));
                 }
             }
         }
-    }
-
-    static class MockServerHolder implements ExtensionContext.Store.CloseableResource {
-        private final WireMockServer server;
-
-        public MockServerHolder(WireMockServer server) {
-            this.server = server;
-            this.server.start();
-            System.out.println("WireMock Server started on port: " + server.port());
-        }
-
-        @Override
-        public void close() {
-            if (server.isRunning()) {
-                server.stop();
-                System.out.println("WireMock Server stopped.");
-            }
-        }
-
-        public WireMockServer getServer() {
-            return server;
+        if (MockServiceRegistry.get() == null && sharedServer != null) {
+            MockServiceRegistry.set(new MockService(sharedServer));
         }
     }
 }

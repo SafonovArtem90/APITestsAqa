@@ -2,7 +2,10 @@ package core.constants;
 
 import core.config.ConfigReader;
 
-public class CoreConstants {
+public final class CoreConstants {
+
+    private CoreConstants() {
+    }
 
     public static final String REGEX = ConfigReader.getProperty("token.regex");
     public static final int LENGTH = Integer.parseInt(ConfigReader.getProperty("token.length"));

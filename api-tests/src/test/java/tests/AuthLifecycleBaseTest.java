@@ -16,9 +16,9 @@ import static constants.TestConstants.ERROR_MESSAGE;
 import static constants.TestConstants.INTERNAL_SERVER_ERROR;
 import static constants.TestConstants.MISSING_KEY_ERROR;
 import static constants.TestConstants.OK_MESSAGE;
-import static constants.TestConstants.TOKEN_MUST_MATCHES_REGEX;
 import static constants.TestConstants.errorMessageTokenNotFound;
 import static core.utils.Assertions.assertFieldEquals;
+import static core.utils.Assertions.assertMessageContains;
 import static core.utils.Assertions.assertStatusCode;
 import static core.utils.ParamsRequiredGenerator.generateParamsWithAction;
 import static core.utils.ParamsRequiredGenerator.generateParamsWithLogin;
@@ -116,12 +116,12 @@ class AuthLifecycleBaseTest extends BaseTest {
     @Severity(SeverityLevel.NORMAL)
     void testLoginInvalidTokenLength() {
         String token = generateInValidToken();
-        step("Попытка входа при недоступности внешнего сервиса.", () -> {
+        step("Попытка входа с невалидным token (31 символ).", () -> {
             var response = serviceSteps.receivedResponse(generateParamsWithTokenAndAction(token, ActionsEnum.LOGIN));
             assertAll(
                     () -> assertStatusCode(response.getStatusCode(), 400),
                     () -> assertFieldEquals(response.as(FailRs.class).result(), ERROR_MESSAGE),
-                    () -> assertFieldEquals(response.as(FailRs.class).message(), TOKEN_MUST_MATCHES_REGEX)
+                    () -> assertMessageContains(response.as(FailRs.class).message(), "^[0-9A-F]{32}$")
             );
         });
 

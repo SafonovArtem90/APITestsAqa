@@ -1,0 +1,19 @@
+FROM maven:3.9.9-eclipse-temurin-17
+
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY pom.xml ./
+COPY api-core/pom.xml api-core/
+COPY api-mock/pom.xml api-mock/
+COPY api-tests/pom.xml api-tests/
+COPY config/checkstyle/checkstyle.xml config/checkstyle/checkstyle.xml
+
+RUN mvn -q dependency:go-offline || true
+
+COPY . .
+COPY docker-entrypoint-tests.sh /app/docker-entrypoint-tests.sh
+RUN chmod +x /app/docker-entrypoint-tests.sh
+
+ENTRYPOINT ["/app/docker-entrypoint-tests.sh"]

@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.UUID;
 
 public class CustomAllureRestAssured extends AllureRestAssured {
@@ -72,14 +73,11 @@ public class CustomAllureRestAssured extends AllureRestAssured {
 
     private String extractActionFromRequest(FilterableRequestSpecification requestSpec) {
         try {
-            Object bodyObj = requestSpec.getFormParams();
-            if (bodyObj != null) {
-                String body = bodyObj.toString();
-                if (body.contains("action=")) {
-                    int start = body.indexOf("action=") + 7;
-                    int end = body.indexOf("&", start);
-                    if (end == -1) end = body.length();
-                    return body.substring(start, end);
+            Map<String, ?> formParams = requestSpec.getFormParams();
+            if (formParams != null) {
+                Object action = formParams.get("action");
+                if (action != null) {
+                    return action.toString();
                 }
             }
         } catch (Exception ignored) {

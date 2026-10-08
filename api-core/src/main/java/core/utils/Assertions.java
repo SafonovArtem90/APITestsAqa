@@ -14,4 +14,10 @@ public class Assertions {
     public static void assertFieldEquals(String actual, String expected) {
         assertEquals(expected, actual, "Значение поля в ответе должно соответствовать ожидаемому.");
     }
+
+    @Step("Проверка, что сообщение ответа содержит фрагмент: {1}")
+    public static void assertMessageContains(String actual, String fragment) {
+        assertTrue(actual != null && actual.contains(fragment),
+                   "Сообщение в ответе должно содержать фрагмент: " + fragment);
+    }
 }
