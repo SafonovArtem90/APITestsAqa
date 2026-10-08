@@ -33,10 +33,12 @@ Java 17, Maven, JUnit 5, RestAssured, WireMock, Allure, Lombok
 JAR-файл приложения находится в папке `resources/jars/` проекта
 (вне Telegram и других внешних путей). Запуск:
 ```
-java -Dsecret=qazWSXedc -Dmock=http://localhost:8888/ -jar resources/jars/internal-0.0.1-SNAPSHOT.jar
+java -Dsecret=<ВАШ_SECRET> -Dmock=http://localhost:8888/ -jar resources/jars/internal-0.0.1-SNAPSHOT.jar
 ```
 
 #### Команды запуска
+* Перед запуском тестов задайте API-ключ (не хранится в коде):
+  `export SERVICE_API_KEY=<ВАШ_API_KEY>`
 * Сборка проекта и запуск тестов: `mvn clean test`
 * Параллельный запуск: `-Dparallel=true|false` (по умолчанию true).
 * Количество потоков: `-Dparallel.threads=<N>` (по умолчанию 4).
@@ -49,8 +51,8 @@ java -Dsecret=qazWSXedc -Dmock=http://localhost:8888/ -jar resources/jars/intern
 * Тестируемое приложение: `docker build -t aqa-app . && docker run -p 8080:8080 aqa-app`
 * Полный прогон тестов (приложение + WireMock + `mvn test`) в одном контейнере:
   `docker build -f Dockerfile.test -t aqa-tests .`
-  `docker run --rm -v "$PWD/allure-results:/app/api-tests/target/allure-results" aqa-tests`
-* Запуск приложения через docker-compose: `docker compose -f docker-compose.yml up`
+  `docker run --rm -e SECRET=<ВАШ_SECRET> -e SERVICE_API_KEY=<ВАШ_API_KEY> -v "$PWD/allure-results:/app/api-tests/target/allure-results" aqa-tests`
+* Запуск приложения через docker-compose: `SECRET=<ВАШ_SECRET> SERVICE_API_KEY=<ВАШ_API_KEY> docker compose -f docker-compose.yml up`
 
 ### Запуск в GitHub (CI)
 Файл `.github/workflows/api-tests.yml`:
@@ -68,7 +70,7 @@ java -Dsecret=qazWSXedc -Dmock=http://localhost:8888/ -jar resources/jars/intern
 | Ключ properties | Env var | Значение по умолчанию |
 |---|---|---|
 | service.base.url | SERVICE_BASE_URL | http://localhost:8080 |
-| service.api.key | SERVICE_API_KEY | qazWSXedc |
+| service.api.key | SERVICE_API_KEY | **обязательно (secret)** |
 | mock.service.port | MOCK_SERVICE_PORT | 8888 |
 | token.length | TOKEN_LENGTH | 32 |
 | token.regex | TOKEN_REGEX | ^[0-9A-F]{32}$ |

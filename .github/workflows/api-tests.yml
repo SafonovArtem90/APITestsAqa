@@ -9,7 +9,8 @@ on:
 
 env:
   SERVICE_BASE_URL: http://localhost:8080
-  SERVICE_API_KEY: qazWSXedc
+  SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
+  SECRET: ${{ secrets.SECRET }}
   MOCK_SERVICE_PORT: "8888"
   TOKEN_LENGTH: "32"
   TOKEN_REGEX: ^[0-9A-F]{32}$
@@ -32,6 +33,7 @@ jobs:
           docker run --rm \
             -e SERVICE_BASE_URL="${SERVICE_BASE_URL}" \
             -e SERVICE_API_KEY="${SERVICE_API_KEY}" \
+            -e SECRET="${SECRET}" \
             -e MOCK_SERVICE_PORT="${MOCK_SERVICE_PORT}" \
             -e TOKEN_LENGTH="${TOKEN_LENGTH}" \
             -e TOKEN_REGEX="${TOKEN_REGEX}" \

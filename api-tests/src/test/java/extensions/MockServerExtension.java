@@ -7,12 +7,18 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import service.MockService;
 
+/**
+ * Поднимает один общий WireMockServer на весь запуск тестов.
+ * Сервер регистрируется в MockServiceRegistry и останавливается через shutdown hook,
+ * чтобы корректно работать при параллельном выполнении классов тестов.
+ */
 public class MockServerExtension implements BeforeAllCallback {
 
     private static volatile WireMockServer sharedServer;
 
     @Override
     public void beforeAll(ExtensionContext context) {
+        // Double-checked locking: создаём сервер только если его ещё нет или он остановлен.
         if (sharedServer == null || !sharedServer.isRunning()) {
             synchronized (MockServerExtension.class) {
                 if (sharedServer == null || !sharedServer.isRunning()) {

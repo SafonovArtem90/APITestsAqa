@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY resources/jars/internal-0.0.1-SNAPSHOT.jar app.jar
 
-ENV SECRET=qazWSXedc
+# SECRET passed via docker run -e SECRET=... (GitHub Actions secret)
 ENV MOCK_URL=http://localhost:8888/
 
 EXPOSE 8080

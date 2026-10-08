@@ -13,6 +13,11 @@ import java.util.List;
 
 import static base.MockRegister.mockRegisterStub;
 
+/**
+ * Перехватывает выполнение тестового метода, чтобы:
+ * 1) до теста зарегистрировать мок-заглушки на WireMock (через аннотацию @WithMock и mockRegisterStub),
+ * 2) после теста удалить зарегистрированные стабы (cleanupStubs).
+ */
 public class MockSetupExtension implements InvocationInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(MockSetupExtension.class);
@@ -44,6 +49,7 @@ public class MockSetupExtension implements InvocationInterceptor {
     }
 
     private String findTokenArgument(List<Object> arguments) {
+        // Токен для стабов берём из аргумента-параметра теста типа Token (@TokenExtensions Token token).
         return arguments.stream()
                         .filter(arg -> arg instanceof Token)
                         .map(arg -> ((Token) arg).getToken())

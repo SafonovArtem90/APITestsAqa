@@ -9,6 +9,7 @@ public final class MockServiceRegistry {
     private MockServiceRegistry() {
     }
 
+    /** Получить общий MockService для текущего запуска (инициализируется в MockServerExtension.beforeAll). */
     public static MockService get() {
         return service;
     }

@@ -17,6 +17,7 @@ public class RetryingExtension implements InvocationInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(RetryingExtension.class);
 
+    // Количество попыток = TEST_RETRY_COUNT + 1 (первая попытка + N ретраев).
     private int maxAttempts() {
         String prop = System.getProperty("test.retry.count");
         if (prop != null) {

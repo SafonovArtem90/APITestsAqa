@@ -11,6 +11,10 @@ import service.MockService;
 public class MockRegister {
     private static final Logger log = LoggerFactory.getLogger(MockRegister.class);
 
+    /**
+     * Регистрирует WireMock-стабы на основании аннотации @WithMock на тестовом методе.
+     * MockType.SUCCESS → стаб отвечает 200, MockType.ERROR → стаб отвечает 500.
+     */
     public static void mockRegisterStub(ExtensionContext context, MockService mockService, String token){
 
         context.getTestMethod().ifPresent(method -> {
